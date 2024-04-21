@@ -1,25 +1,39 @@
 package main
 
 import (
+	"flag"
 	"log"
 	"net/http"
+	"os"
 )
 
+type application struct {
+	infoLog  *log.Logger
+	errorLog *log.Logger
+}
+
 func main() {
-	mux := http.NewServeMux()
-	fileServer := http.FileServer(neuteredFileSystem{http.Dir("./ui/static/")})
+	addr := flag.String("addr", ":4000", "HTTP network address")
 
-	mux.Handle("/static/", http.StripPrefix("/static", fileServer))
+	flag.Parse()
 
-	mux.HandleFunc("/", home)
-	mux.HandleFunc("/snippet/view", snippetView)
-	mux.HandleFunc("/snippet/create", snippetCreate)
-	// new way to handle different methods, introduced in Go 1.22:
-	// mux.HandleFunc("POST /snippet/create", snippetCreate)
+	infoLog := log.New(os.Stdout, "INFO\t", log.Ldate|log.Ltime)
+	errorLog := log.New(os.Stderr, "ERROR\t", log.Ldate|log.Ltime|log.Lshortfile)
 
-	log.Print("Starting server on :4000")
-	err := http.ListenAndServe("localhost:4000", mux)
+	app := &application{
+		infoLog:  infoLog,
+		errorLog: errorLog,
+	}
+
+	srv := http.Server{
+		Addr:     *addr,
+		ErrorLog: errorLog,
+		Handler:  app.routes(),
+	}
+
+	infoLog.Printf("Starting server on %s", *addr)
+	err := srv.ListenAndServe()
 	if err != nil {
-		log.Fatal(err)
+		errorLog.Fatal(err)
 	}
 }
