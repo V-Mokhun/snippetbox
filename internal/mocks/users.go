@@ -2,11 +2,6 @@ package mocks
 
 import "github.com/v-mokhun/snippetbox/internal/models"
 
-// var mockUser = &models.User{
-// 	ID: 1,
-// 	Name: "Bob",
-// }
-
 type UserModel struct{}
 
 func (m *UserModel) Insert(name, email, password string) error {
