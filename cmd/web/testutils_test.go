@@ -36,6 +36,7 @@ func newTestApplication(t *testing.T) *application {
 		templateCache:  templateCache,
 		formDecoder:    form.NewDecoder(),
 		sessionManager: sessionManager,
+		debug:          false,
 	}
 }
 
